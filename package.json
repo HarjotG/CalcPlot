@@ -1,0 +1,22 @@
+{
+  "name": "Grapher",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.27.0",
+    "webpack-cli": "^4.5.0"
+  },
+  "dependencies": {
+    "@types/katex": "^0.11.0",
+    "@types/mathjs": "^6.0.11",
+    "katex": "^0.13.0",
+    "mathjs": "^9.3.0"
+  }
+}
