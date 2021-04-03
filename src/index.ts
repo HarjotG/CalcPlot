@@ -7,7 +7,9 @@ const canvas = <HTMLCanvasElement>document.getElementById("c1");
 let scale = 1/100; // the scale to draw the graph at
 const dx = 1; // the resolution of the graph
 
-(<HTMLInputElement>document.getElementById('function')).value = "x^2"; // set the default value for the function as x
+(<HTMLInputElement>document.getElementById('function')).value = "x^2"; // set the default value for the function as x^2
+(<HTMLInputElement>document.getElementById('riemann_a')).value = "-2"; // set the default value for the function as x^2
+(<HTMLInputElement>document.getElementById('riemann_b')).value = "2"; // set the default value for the function as x^2
 
 let graph = new Graph(canvas, scale, dx);
 
@@ -54,6 +56,9 @@ window.addEventListener('resize', function() {
 }); // resize the canvas when the window is resized
 
 document.getElementById("Plot")?.addEventListener("click", function(){
+    graph.clearPlot();
+    expressions = [];
+    points = [];
     let func = (<HTMLInputElement>document.getElementById('function')).value;
     expressions[0] = new Expression(func);
     graph.drawExpressions(expressions);
@@ -61,11 +66,6 @@ document.getElementById("Plot")?.addEventListener("click", function(){
     katex.render(func, <HTMLElement>document.getElementById('katex'));
 });
 
-document.getElementById("Clear")?.addEventListener("click", function(){
-    graph.clearPlot();
-    expressions = [];
-    points = [];
-});
 
 document.getElementById("Derivative")?.addEventListener("click", function(){
     expressions[1] = expressions[0].derivative();
@@ -73,7 +73,16 @@ document.getElementById("Derivative")?.addEventListener("click", function(){
     graph.draw_points(points);
 });
 
-document.getElementById("Riemann")?.addEventListener("click", function(){
-    points = expressions[0].mid_riemann(-5, 5, 8);
-    graph.draw_points(points);
-});
+
+let slider = document.getElementById('riemann_n');
+if(slider) {
+    slider.oninput = function() {
+        graph.clearPlot();
+        graph.drawExpressions(expressions);
+        let a = parseInt((<HTMLInputElement>document.getElementById('riemann_a')).value, 10);
+        let b = parseInt((<HTMLInputElement>document.getElementById('riemann_b')).value, 10);
+        let n = parseInt((<HTMLInputElement>slider)?.value, 10);
+        points = expressions[0].left_riemann(a, b, n);
+        graph.draw_points(points);
+    }
+}
