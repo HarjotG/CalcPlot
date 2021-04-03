@@ -1,4 +1,4 @@
-import { Graph } from './Graph.js';
+import { Graph, Point } from './Graph.js';
 import katex from 'katex';
 import { Expression } from './Expression.js';
 
@@ -13,30 +13,67 @@ let graph = new Graph(canvas, scale, dx);
 
 let expressions:Expression[] = [];
 expressions.length = 3;
+let points:Point[] = [];
+
+let mouse_down_flag = false;        // keep track of whether mouse is clicked down
+let lastX = 0;                      // keep track of where the last mouse move was
+let lastY = 0;
 
 canvas.addEventListener('wheel', function(event) {
-    graph.rescale(event.deltaY/50);
+    graph.rescale(event.deltaY/50, lastX - canvas.getBoundingClientRect().left, lastY - canvas.getBoundingClientRect().top);
     graph.drawExpressions(expressions);
+    graph.draw_points(points);
 });
+
+canvas.addEventListener('mousemove', function(event) {
+    if(mouse_down_flag){
+        graph.move_center(event.clientX - lastX, event.clientY - lastY);
+        graph.drawExpressions(expressions);
+        graph.draw_points(points);
+    }
+    lastX = event.clientX;
+    lastY = event.clientY;
+})
+
+canvas.addEventListener('mousedown', function(event) {
+    mouse_down_flag = true;
+    lastX = event.clientX;
+    lastY = event.clientY;
+})
+
+canvas.addEventListener('mouseup', function(event) {
+    mouse_down_flag = false;
+    lastX = event.clientX;
+    lastY = event.clientY;
+})
 
 window.addEventListener('resize', function() {
     graph.resize();
     graph.drawExpressions(expressions);
+    graph.draw_points(points);
 }); // resize the canvas when the window is resized
 
 document.getElementById("Plot")?.addEventListener("click", function(){
     let func = (<HTMLInputElement>document.getElementById('function')).value;
     expressions[0] = new Expression(func);
     graph.drawExpressions(expressions);
+    points = [];
     katex.render(func, <HTMLElement>document.getElementById('katex'));
 });
 
 document.getElementById("Clear")?.addEventListener("click", function(){
     graph.clearPlot();
     expressions = [];
+    points = [];
 });
 
 document.getElementById("Derivative")?.addEventListener("click", function(){
     expressions[1] = expressions[0].derivative();
     graph.drawExpressions(expressions);
+    graph.draw_points(points);
+});
+
+document.getElementById("Riemann")?.addEventListener("click", function(){
+    points = expressions[0].mid_riemann(-5, 5, 8);
+    graph.draw_points(points);
 });

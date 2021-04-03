@@ -6,12 +6,16 @@ export class Graph {
     private scale:number;               // the scale to draw the graph at
     private gridscale:number
     private dx:number;                  // the resolution of the graph
+    private cx:number;                  // center of graph x
+    private cy:number;                  // center of graph y
 
     constructor(canvas:HTMLCanvasElement, scale:number, dx:number) {
         this.canvas = canvas;
         this.scale = scale;
         this.gridscale = scale;
         this.dx = dx;
+        this.cx = 0;
+        this.cy = 0;
         this.resize();
     }
 
@@ -36,13 +40,47 @@ export class Graph {
         this.drawGrid();
     }
 
-    rescale(scale_d:number):void {
+    rescale(scale_d:number, m_x:number, m_y:number):void {
         if(this.scale + scale_d*this.scale > 0){
+            m_x -= this.canvas.width/2;
+            m_y -= this.canvas.height/2;
+            console.log(m_x);
+            console.log(m_y);
             this.scale += scale_d*this.scale;
             this.gridscale += scale_d*this.gridscale;
-            console.log(this.scale);
+            this.cx -= (this.cx - m_x)*scale_d;
+            this.cy -= (this.cy - m_y)*scale_d;
             this.drawGrid();
         }
+    }
+
+    move_center(new_cx:number, new_cy:number) {
+        this.cx += new_cx;
+        this.cy += new_cy;
+        this.drawGrid();
+    }
+
+    draw_points(points:Point[]) {
+        let ctx = this.canvas.getContext("2d")!;
+        let prevss = ctx.strokeStyle;
+        ctx.strokeStyle = "#0000AF";
+        ctx.fillStyle = "rgba(135, 206, 235, 0.4)"; // light blue
+        ctx.beginPath();    // reset the canvas pen
+        for(let i = 1; i < points.length; i++) {
+            let x1 = points[i-1].x;
+            let y1 = points[i-1].y;
+            let x2 = points[i].x;
+            let y2 = points[i].y;
+            ctx.moveTo((x1 + this.cx*this.scale) / this.scale, (-y1 + this.cy*this.scale) / this.scale);
+            ctx.lineTo((x2 + this.cx*this.scale) / this.scale, (-y2 + this.cy*this.scale) / this.scale);
+            if(i % 3 == 0) {
+                ctx.fillRect((points[i-2].x + this.cx*this.scale) / this.scale, (-points[i-2].y + this.cy*this.scale) / this.scale, (points[i].x -  points[i-2].x)/this.scale, points[i-2].y/this.scale);
+                console.log("x: " + ((points[i-2].x + this.cx*this.scale) / this.scale) + " y: " + ((-points[i-2].y + this.cy*this.scale) / this.scale) + " w: " + ((points[i].x -  points[i-2].x)/this.scale) + " h: " +  (points[i-2].y/this.scale));
+
+            }
+        }
+        ctx.stroke();
+        ctx.strokeStyle = prevss;
     }
 
 
@@ -51,17 +89,17 @@ export class Graph {
         let prevss = ctx.strokeStyle;
         ctx.strokeStyle = "#FF0000";
         ctx.beginPath();    // reset the canvas pen
-        for(let i = -ctx.canvas.width / 2; i < ctx.canvas.width / 2; i+=this.dx) {
+        ctx.lineWidth = 5;
+        for(let i = -ctx.canvas.width / 2 - this.cx; i < ctx.canvas.width / 2 - this.cx; i+=this.dx) {
             let x_0 = i*this.scale;
             let x_1 = (i+this.dx)*this.scale;
             let y_0 = expr.evaluate(x_0);
             let y_1 = expr.evaluate(x_1);
             // draw each line segment
-            if(Math.abs(y_0) < ctx.canvas.height / 2 && Math.abs(y_1) < ctx.canvas.height / 2) {
-                ctx.moveTo(x_0 / this.scale, -y_0 / this.scale);
-                ctx.lineTo((x_1 / this.scale), -y_1 / this.scale);
+            if(Math.abs(y_0 - y_1) < ctx.canvas.height) {
+                ctx.moveTo((x_0 + this.cx*this.scale) / this.scale, (-y_0 + this.cy*this.scale) / this.scale);
+                ctx.lineTo(((x_1 + this.cx*this.scale) / this.scale), (-y_1 + this.cy*this.scale) / this.scale);
             }
-            ctx.lineWidth = 5;
         }
         ctx.stroke();
         ctx.strokeStyle = prevss;
@@ -75,9 +113,11 @@ export class Graph {
         else if(1/this.gridscale > 250) {
             this.gridscale *= 5;
         }
-        // draw vertical lines starting from center
-        for(let i = 0; i < ctx.canvas.width / 2; i+=(1/this.gridscale)) {
-            if(i == 0) {
+        ctx.font = "16px Arial";
+        ctx.fillStyle = '#000000';
+        // draw vertical lines to the right of center
+        for(let i = this.cx; i < ctx.canvas.width / 2; i+=(1/this.gridscale)) {
+            if(i == this.cx) {
                 ctx.beginPath();
                 ctx.lineWidth = 4;
             } else {
@@ -86,13 +126,28 @@ export class Graph {
             }
             ctx.moveTo(i, -ctx.canvas.height / 2);
             ctx.lineTo(i, ctx.canvas.height / 2);
-            ctx.moveTo(-i, -ctx.canvas.height / 2);
-            ctx.lineTo(-i, ctx.canvas.height / 2);
+            ctx.fillText('' + Math.round(((i-this.cx)*this.scale)*10000)/10000, i, this.cy+20);
             ctx.stroke();
         }
-        // draw horizontal lines startig from center
-        for(let i = 0; i < ctx.canvas.height / 2; i+=(1/this.gridscale)) {
-            if(i == 0) {
+
+        // draw vertical lines to the left of center
+        for(let i = this.cx; i > -ctx.canvas.width / 2; i-=(1/this.gridscale)) {
+            if(i == this.cx) {
+                ctx.beginPath();
+                ctx.lineWidth = 4;
+            } else {
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+            }
+            ctx.moveTo(i, -ctx.canvas.height / 2);
+            ctx.lineTo(i, ctx.canvas.height / 2);
+            ctx.fillText('' + Math.round(((i - this.cx)*this.scale)*10000)/10000, i, this.cy+20);
+            ctx.stroke();
+        }
+
+        // draw horizontal lines below the center
+        for(let i = this.cy; i < ctx.canvas.height / 2; i+=(1/this.gridscale)) {
+            if(i == this.cy) {
                 ctx.beginPath();
                 ctx.lineWidth = 4;
             } else {
@@ -101,20 +156,28 @@ export class Graph {
             }
             ctx.moveTo(-ctx.canvas.width / 2, i);
             ctx.lineTo(ctx.canvas.width / 2, i);
-            ctx.moveTo(-ctx.canvas.width / 2, -i);
-            ctx.lineTo(ctx.canvas.width / 2, -i);
+            ctx.fillText('' + Math.round(((this.cy - i)*this.scale)*10000)/10000, this.cx-20, i);
             ctx.stroke();
         }
-        ctx.font = "16px Arial";
-        // write numbers for scale on x-axis
-        for(let i = 0; i < ctx.canvas.width / 2; i+=(1/this.gridscale)) {
-            ctx.fillText('' + Math.round((i*this.scale)*10000)/10000, i, +20);
-            ctx.fillText('' + Math.round((-i*this.scale)*10000)/10000, -i, +20);
-        }
-        // write numbers for scale on y-axis
-        for(let i = 0; i < ctx.canvas.height / 2; i+=(1/this.gridscale)) {
-            ctx.fillText('' + Math.round((i*this.scale)*10000)/10000, -20, i);
-            ctx.fillText('' + Math.round((-i*this.scale)*10000)/10000, -20, -i);
+
+        // draw horizontal lines above the center
+        for(let i = this.cy; i > -ctx.canvas.height / 2; i-=(1/this.gridscale)) {
+            if(i == this.cy) {
+                ctx.beginPath();
+                ctx.lineWidth = 4;
+            } else {
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+            }
+            ctx.moveTo(-ctx.canvas.width / 2, i);
+            ctx.lineTo(ctx.canvas.width / 2, i);
+            ctx.fillText('' + Math.round(((this.cy - i)*this.scale)*10000)/10000, this.cx-20, i);
+            ctx.stroke();
         }
     }
+}
+
+export interface Point {
+    x:number;
+    y:number;
 }
