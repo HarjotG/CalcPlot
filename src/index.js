@@ -52,7 +52,7 @@ window.addEventListener('resize', function () {
     expressions[0] = new Expression(func, "#FF0000");
     graph.drawExpressions(expressions);
     points = [];
-    katex.render(func, document.getElementById('katex'));
+    katex.render("f(x) = " + func, document.getElementById('katex'));
 });
 (_b = document.getElementById("Derivative")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", function () {
     expressions[1] = expressions[0].derivative();
@@ -70,5 +70,6 @@ if (slider) {
         let n = parseInt((_a = slider) === null || _a === void 0 ? void 0 : _a.value, 10);
         points = expressions[0].left_riemann(a, b, n);
         graph.draw_points(points);
+        katex.render("\\sum_{i=0}^{" + (n - 1) + "} \\frac{" + b + "-" + a + "}{" + n + "} f(x_i)", document.getElementById('riemann_katex'));
     };
 }

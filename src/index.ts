@@ -63,7 +63,7 @@ document.getElementById("Plot")?.addEventListener("click", function(){
     expressions[0] = new Expression(func, "#FF0000");
     graph.drawExpressions(expressions);
     points = [];
-    katex.render(func, <HTMLElement>document.getElementById('katex'));
+    katex.render("f(x) = " + func, <HTMLElement>document.getElementById('katex'));
 });
 
 
@@ -84,5 +84,6 @@ if(slider) {
         let n = parseInt((<HTMLInputElement>slider)?.value, 10);
         points = expressions[0].left_riemann(a, b, n);
         graph.draw_points(points);
+        katex.render("\\sum_{i=0}^{" + (n-1) + "} \\frac{" + b + "-" + a + "}{" + n + "} f(x_i)", <HTMLElement>document.getElementById('riemann_katex'))
     }
 }

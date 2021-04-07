@@ -45,8 +45,6 @@ export class Graph {
         if(this.scale + scale_d*this.scale > 0){
             m_x -= this.canvas.width/2;
             m_y -= this.canvas.height/2;
-            console.log(m_x);
-            console.log(m_y);
             this.scale += scale_d*this.scale;
             this.gridscale += scale_d*this.gridscale;
             this.cx -= (this.cx - m_x)*scale_d;
@@ -76,8 +74,6 @@ export class Graph {
             ctx.lineTo((x2 + this.cx*this.scale) / this.scale, (-y2 + this.cy*this.scale) / this.scale);
             if(i % 3 == 0) {
                 ctx.fillRect((points[i-2].x + this.cx*this.scale) / this.scale, (-points[i-2].y + this.cy*this.scale) / this.scale, (points[i].x -  points[i-2].x)/this.scale, points[i-2].y/this.scale);
-                console.log("x: " + ((points[i-2].x + this.cx*this.scale) / this.scale) + " y: " + ((-points[i-2].y + this.cy*this.scale) / this.scale) + " w: " + ((points[i].x -  points[i-2].x)/this.scale) + " h: " +  (points[i-2].y/this.scale));
-
             }
         }
         ctx.stroke();
