@@ -60,7 +60,7 @@ document.getElementById("Plot")?.addEventListener("click", function(){
     expressions = [];
     points = [];
     let func = (<HTMLInputElement>document.getElementById('function')).value;
-    expressions[0] = new Expression(func);
+    expressions[0] = new Expression(func, "#FF0000");
     graph.drawExpressions(expressions);
     points = [];
     katex.render(func, <HTMLElement>document.getElementById('katex'));

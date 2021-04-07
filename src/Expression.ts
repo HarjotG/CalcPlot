@@ -4,14 +4,16 @@ import {Point} from './Graph'
 export class Expression {
     private root:math.MathNode;         // the expression tree
     private expr:math.EvalFunction;     // the compiled expression
+    public color:string;               // color to render expression in
 
-    constructor(expression:MathExpression, root?:MathNode) {
+    constructor(expression:MathExpression, color:string, root?:MathNode) {
         if(typeof root != "undefined") {
             this.root = root;   // if root node was specified, use it
         } else {
             this.root = parse(expression);
         }
         this.expr = this.root.compile();
+        this.color = color;
     }
 
     evaluate(x:number):number {
@@ -19,7 +21,7 @@ export class Expression {
     }
 
     derivative():Expression {
-        return new Expression("", derivative(this.root, "x"));  // make new Expression from derivative
+        return new Expression("", "#228B22", derivative(this.root, "x"));  // make new Expression from derivative
     }
 
     left_riemann(a:number, b:number, count:number):Point[] {

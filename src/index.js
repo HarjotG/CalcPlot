@@ -49,7 +49,7 @@ window.addEventListener('resize', function () {
     expressions = [];
     points = [];
     let func = document.getElementById('function').value;
-    expressions[0] = new Expression(func);
+    expressions[0] = new Expression(func, "#FF0000");
     graph.drawExpressions(expressions);
     points = [];
     katex.render(func, document.getElementById('katex'));

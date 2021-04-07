@@ -9,6 +9,7 @@ export class Graph {
         this.resize();
     }
     drawExpressions(expressions) {
+        let ctx = this.canvas.getContext("2d");
         this.clearPlot();
         expressions.forEach((expr) => {
             this.drawExpression(expr);
@@ -68,7 +69,7 @@ export class Graph {
     drawExpression(expr) {
         let ctx = this.canvas.getContext("2d");
         let prevss = ctx.strokeStyle;
-        ctx.strokeStyle = "#FF0000";
+        ctx.strokeStyle = expr.color;
         ctx.beginPath(); // reset the canvas pen
         ctx.lineWidth = 5;
         for (let i = -ctx.canvas.width / 2 - this.cx; i < ctx.canvas.width / 2 - this.cx; i += this.dx) {
@@ -87,6 +88,7 @@ export class Graph {
     }
     drawGrid() {
         let ctx = this.canvas.getContext("2d");
+        ctx.strokeStyle = "#000000";
         if (1 / this.gridscale < 35) {
             this.gridscale *= 1 / 5;
         }

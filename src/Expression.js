@@ -1,6 +1,6 @@
 import { parse, derivative } from 'mathjs';
 export class Expression {
-    constructor(expression, root) {
+    constructor(expression, color, root) {
         if (typeof root != "undefined") {
             this.root = root; // if root node was specified, use it
         }
@@ -8,12 +8,13 @@ export class Expression {
             this.root = parse(expression);
         }
         this.expr = this.root.compile();
+        this.color = color;
     }
     evaluate(x) {
         return this.expr.evaluate({ x: x });
     }
     derivative() {
-        return new Expression("", derivative(this.root, "x")); // make new Expression from derivative
+        return new Expression("", "#228B22", derivative(this.root, "x")); // make new Expression from derivative
     }
     left_riemann(a, b, count) {
         let points = [];
